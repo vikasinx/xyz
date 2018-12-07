@@ -1,10 +1,11 @@
 $(function() {
+    var str_count = $('#rating_star').val();
     $("#rating_star").spaceo_rating_widget({
         starLength: '5',
-        initialValue: '',
+        initialValue: str_count,
         callbackFunctionName: 'processRating',
         imageDirectory: './wp-content/plugins/wc-author-rating/img/',
-        inputAttr: 'authorid'
+        inputAttr: '1'
     });
 });
 function processRating (val, attrVal){
