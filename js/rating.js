@@ -1,11 +1,3 @@
-/*!
- * Star Rating
- * by Jignesh Patel With Spaceo Technologies PVT LTD.
- *
- * More info:
- * http://www.spaceotechnologies.com
- */
- 
 (function(a){
     a.fn.spaceo_rating_widget = function(p){
         var p = p||{};
@@ -46,7 +38,7 @@
             var a = $("<ul>");
             a.addClass("spaceo_rating_widget");
             for(var i=1;i<=b;i++){
-                a.append('<li style="background-image:url('+d+'/widget_star.gif)"><span>'+i+'</span></li>')
+                a.append('<li style="background-image:url('+d+'http://172.10.24.50/wp/test_woo/wp-content/plugins/wc-author-rating/img/widget_star.gif)"><span>'+i+'</span></li>')
             }
             a.insertAfter(g);
             if(e != ""){

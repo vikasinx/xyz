@@ -24,7 +24,8 @@ function jal_install() {
 
 	$sql = "CREATE TABLE $table_name (
 		  `rating_id` int(11) NOT NULL AUTO_INCREMENT,
-		  `post_id` int(11) NOT NULL,
+		  `authorid` int(11) NOT NULL,
+		  `buyerid` int(11) NOT NULL,
 		  `rating_number` int(11) NOT NULL,
 		  `total_points` int(11) NOT NULL,
 		  `created` datetime NOT NULL,
@@ -74,9 +75,9 @@ function add_buyer_rating_menu_endpoints() {
 );
 
 global $wpdb;
-$query = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating FROM woo_buyer_rating WHERE post_id = 1 AND status = 1";
+$query = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating , authorid FROM woo_buyer_rating WHERE authorid = 1 AND status = 1 GROUP BY authorid";
 $result = $wpdb->get_results($query);
-
+print_r($result);
 	$users = get_users($args);
 	foreach ($users as $user) 
 	{
@@ -84,11 +85,10 @@ $result = $wpdb->get_results($query);
 	   echo '<input name="rating" value="0" id="rating_star" type="hidden" postID="1" />';
     	echo'<div class="overall-rating">(Average Rating <span id="avgrat">'.$result['average_rating'].'</span>
     		 Based on <span id="totalrat">'.$result['rating_number'].'</span> rating)</span></div>';
-	}
- 
+	} 
 }
 
-/*Inclue Css and JS file*/
+/*Inclue CSS and JS file*/
 
 add_action('wp_enqueue_scripts', 'buyer_ratings_enqueue_func');
 function buyer_ratings_enqueue_func() {
@@ -116,7 +116,7 @@ add_action( 'wp_enqueue_scripts', 'my_enqueue' );
 /*function get_buyer_ratings($bid)
 {
 	global $wpdb;
-	$query = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating FROM woo_buyer_rating WHERE post_id = 1 AND status = 1";
+	$query = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating FROM woo_buyer_rating WHERE authorid = 1 AND status = 1";
 	$result = $wpdb->get_results($query);
 	return $result;
 }*/
@@ -129,48 +129,39 @@ function rate_buyer() {
 
 	if(!empty($_POST['points'])){
 
-    $post_id = '1'; //$_POST['post_id'];
+    $authorid = '1'; //$_POST['authorid'];
+    $buyerid = '4';
     $rating_default_number = 1;
     $points = $_POST['points'];
 	global $wpdb;
-	/*$insert = $wpdb->insert('woo_buyer_rating', array('post_id' => $post_id, 'rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( '%s', '%d','%s','%s','%s'));*/
-$wpdb->insert('woo_buyer_rating',array('post_id'=>$post_id,'rating_number'=>$rating_default_number),array('%s','%s'));
-
-    /*$query = "INSERT INTO woo_buyer_rating (post_id,rating_number,total_points,created,modified) VALUES(".$post_id.",'".$rating_default_number."','".$points."','".date("Y-m-d H:i:s")."','".date("Y-m-d H:i:s")."')";
-        $insert = $wpdb->insert($query);*/
-       // echo $insert;
-        die();
-
+	
     //Check the rating row with same post ID
-    $prevRatingQuery = "SELECT * FROM woo_buyer_rating WHERE post_id = ".$post_id;
+    $prevRatingQuery = "SELECT * FROM woo_buyer_rating WHERE authorid = ".$authorid;
     $prevRatingResult = $wpdb->get_results($prevRatingQuery);
-    if($prevRatingResult->num_rows > 0):
-        $prevRatingRow = $prevRatingResult->fetch_assoc();
-        $rating_default_number = $prevRatingRow['rating_number'] + $rating_default_number;
-        $points = $prevRatingRow['total_points'] + $points;
-        //Update rating data into the database
-        $query = "UPDATE woo_buyer_rating SET rating_number = '".$rating_default_number."', total_points = '".$points."', modified = '".date("Y-m-d H:i:s")."' WHERE post_id = ".$post_id;
-        $update = $db->query($query);
+
+    if(count($prevRatingResult)> 0):
+        $rating_default_number = $prevRatingResult['rating_number'] + $rating_default_number;
+        $points = $prevRatingResult['total_points'] + $points;
+
+	    //Update rating data into the database       
+	    $wpdb->update('woo_buyer_rating', array('authorid' => $authorid,'buyerid' => $buyerid, 'rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( 'authorid' => $authorid ),array( '%s', '%d','%s','%s','%s'),array( '%d'));
+
     else:
         //Insert rating data into the database
-        $query = "INSERT INTO woo_buyer_rating (post_id,rating_number,total_points,created,modified) VALUES(".$post_id.",'".$rating_default_number."','".$points."','".date("Y-m-d H:i:s")."','".date("Y-m-d H:i:s")."')";
-        $insert = $wpdb->insert($query);
+        $wpdb->insert('woo_buyer_rating', array('authorid' => $authorid,'buyerid' => $buyerid, 'rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( '%s', '%d','%s','%s','%s'));
     endif;
     
     //Fetch rating deatails from database
-    $query2 = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating FROM woo_buyer_rating WHERE post_id = ".$post_id." AND status = 1";
+    $query2 = "SELECT rating_number, FORMAT((total_points / rating_number),1) as average_rating FROM woo_buyer_rating WHERE authorid = ".$authorid." AND status = 1";
     
-    $result = $wpdb->get_results($query2);
-    $ratingRow = $result->fetch_assoc();
-    
-    if($ratingRow){
+    $ratingRow = $wpdb->get_results($query2);
+    if(count($ratingRow)>0){
         $ratingRow['status'] = 'ok';
     }else{
         $ratingRow['status'] = 'err';
-    }
-    
+    }    
     //Return json formatted rating data
-    return json_encode($ratingRow);
+    echo $ratingRow['status'];
     die();
 
 }
