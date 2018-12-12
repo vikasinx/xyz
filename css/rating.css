@@ -1,9 +1,9 @@
-.spaceo_rating_widget{
+.rating_widget{
     padding: 0px;
     margin: 0px;
     float: left;
 }
-.spaceo_rating_widget li{
+.rating_widget li{
     line-height: 0px;
     width: 28px;
     height: 28px;
@@ -14,7 +14,20 @@
     float: left;
     cursor: pointer;
 }
-.spaceo_rating_widget li span{
+.rating_widget li span{
     display: none;
 }
 .overall-rating{font-size: 14px;margin-top: 5px;color: #8e8d8d;}
+span.buyer_nickname { float: left; margin-right: 20px;}
+a.all_buyers {float: left; margin-right: 20px;font-weight: 600;font-size: 20px;text-decoration: underline;}
+a.buyer_link {float: left;clear: left;}
+.buyer_star_rating_wrapper {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}
+.buyers_list {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}

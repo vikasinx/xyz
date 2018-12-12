@@ -1,7 +1,8 @@
 (function(a){
-    a.fn.spaceo_rating_widget = function(p){
+    a.fn.rating_widget = function(p){
         var p = p||{};
         var b = p&&p.starLength?p.starLength:"5";
+        var bid = p&&p.buyerID?p.buyerID:"";
         var c = p&&p.callbackFunctionName?p.callbackFunctionName:"";
         var e = p&&p.initialValue?p.initialValue:"0";
         var d = p&&p.imageDirectory?p.imageDirectory:"img";
@@ -36,7 +37,7 @@
             $('<div style="clear:both;"></div>').insertAfter(g);
             g.css("float","left");
             var a = $("<ul>");
-            a.addClass("spaceo_rating_widget");
+            a.addClass("rating_widget");
             for(var i=1;i<=b;i++){
                 a.append('<li style="background-image:url('+d+'/widget_star.gif)"><span>'+i+'</span></li>')
             }
