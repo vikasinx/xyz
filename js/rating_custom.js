@@ -1,15 +1,15 @@
 $(function() {
     var str_count = $('input[name=rating]').val();
     var buyerID = $('input[name="rating"]').attr('buyerID');
-    var pluginPath = $('input[name="rating"]').attr('pluginPath');
-    console.log(pluginPath);
+    var ratingAVG = $('input[name="rating"]').attr('ratingAVG');
     $("#rating_star_"+buyerID).rating_widget({
         starLength: '5',
         initialValue: str_count,
         callbackFunctionName: 'processRating',
-        imageDirectory: pluginPath+'/img',
+        imageDirectory: '/img',
         inputAttr: '1',
-        buyerID : buyerID     
+        buyerID : buyerID,
+        ratingAVG: ratingAVG     
     });
 });
 

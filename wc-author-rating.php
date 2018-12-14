@@ -71,7 +71,6 @@ function add_buyer_rating_menu_endpoints() {
 	global $wpdb;
 	global $wb;
 	$current_url="//".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-	$plugin_dir = site_url(). '/wp-content/plugins/wc-author-rating/';
 	//echo $current_url;
 	$buyers = get_users($args);
 	echo '<a class="all_buyers" href='.$current_url.'?bid=all>All Buyers</a>';
@@ -86,7 +85,7 @@ function add_buyer_rating_menu_endpoints() {
 		$userdata = get_userdata($b_ID);
 		$result = get_buyer_ratings($b_ID);
 		echo '<div class="buyer_star_rating_wrapper">';
-	   	echo '<span class="buyer_nickname">Rate '.$userdata->user_nicename.'</span><input name="rating" value="'.intval(floor($result[0]->average_rating)).'" id="rating_star_'.$b_ID.'" type="hidden" postID="1" buyerID="'.$b_ID.'" pluginPath="'.$plugin_dir.'" />';
+	   	echo '<span class="buyer_nickname">Rate '.$userdata->user_nicename.'</span><input name="rating" value="'.intval(floor($result[0]->average_rating)).'" id="rating_star_'.$b_ID.'" type="hidden" postID="1" buyerID="'.$b_ID.'" ratingAVG="'.$result[0]->average_rating.'" />';
     	echo'<div class="overall-rating">(Average Rating <span id="avgrat">'.$result[0]->average_rating.'</span>
     		 Based on <span id="totalrat">'.$result[0]->rating_number.'</span> rating)</span></div>';
     	echo  '</div>';

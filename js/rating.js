@@ -3,6 +3,7 @@
         var p = p||{};
         var b = p&&p.starLength?p.starLength:"5";
         var bid = p&&p.buyerID?p.buyerID:"";
+        var ratingAVG = p&&p.ratingAVG?p.ratingAVG:"";
         var c = p&&p.callbackFunctionName?p.callbackFunctionName:"";
         var e = p&&p.initialValue?p.initialValue:"0";
         var d = p&&p.imageDirectory?p.imageDirectory:"img";
@@ -11,13 +12,16 @@
         var g = a(this);
         b = parseInt(b);
         init();
-        g.next("ul").children("li").hover(function(){
-            $(this).parent().children("li").css('background-position','0px 0px');
-            var a = $(this).parent().children("li").index($(this));
-            $(this).parent().children("li").slice(0,a+1).css('background-position','0px -28px')
+        g.next("ul").children("span").hover(function(){
+
+            $(this).parent().children("span").addClass('dashicons-star-empty');
+            var a = $(this).parent().children("span").index($(this));
+            $(this).parent().children("span").slice(0,a+1).removeClass('dashicons-star-empty');
+            $(this).parent().children("span").slice(0,a+1).removeClass('dashicons-star-half');
+            $(this).parent().children("span").slice(0,a+1).addClass('dashicons-star-filled');
         },function(){});
-        g.next("ul").children("li").click(function(){
-            var a = $(this).parent().children("li").index($(this));
+        g.next("ul").children("span").click(function(){
+            var a = $(this).parent().children("span").index($(this));
             var attrVal = (r != '')?g.attr(r):'';
             f = a+1;
             g.val(f);
@@ -27,10 +31,18 @@
         });
         g.next("ul").hover(function(){},function(){
             if(f == ""){
-                $(this).children("li").slice(0,f).css('background-position','0px 0px')
+                $(this).children("span").slice(0,f).addClass('dashicons-star-empty');              
             }else{
-                $(this).children("li").css('background-position','0px 0px');
-                $(this).children("li").slice(0,f).css('background-position','0px -28px')
+                f = parseInt(f);
+                $(this).children("span").addClass('dashicons-star-empty');
+                $(this).children("span").slice(0,f).removeClass('dashicons-star-empty');
+                $(this).children("span").slice(0,f).addClass('dashicons-star-filled');
+                /*console.log(ratingAVG);
+                if(ratingAVG % 1 != 0) {
+                    $(this).children("span").slice(f,f+1).removeClass('dashicons-star-empty');
+                    $(this).children("span").slice(f,f+1).addClass('dashicons-star-half');
+                }*/
+
             }
         });
         function init(){
@@ -39,13 +51,24 @@
             var a = $("<ul>");
             a.addClass("rating_widget");
             for(var i=1;i<=b;i++){
-                a.append('<li style="background-image:url('+d+'/widget_star.gif)"><span>'+i+'</span></li>')
+                a.append('<span class="dashicons dashicons-star-empty"></span>')
             }
             a.insertAfter(g);
             if(e != ""){
                 f = e;
-                g.val(e);
-                g.next("ul").children("li").slice(0,f).css('background-position','0px -28px')
+                g.val(e);          
+                f = parseInt(f);
+                if(ratingAVG % 1 != 0)
+                { 
+                    g.next("ul").children("span").slice(0,f).removeClass('dashicons-star-empty');
+                    g.next("ul").children("span").slice(0,f).addClass('dashicons-star-filled');
+                    g.next("ul").children("span").slice(f,f+1).removeClass('dashicons-star-empty');
+                    g.next("ul").children("span").slice(f,f+1).addClass('dashicons-star-half');
+                } else {
+                    g.next("ul").children("span").slice(0,f).removeClass('dashicons-star-empty');
+                    g.next("ul").children("span").slice(0,f).addClass('dashicons-star-filled');                     
+                }
+                
             }
         }
     }
