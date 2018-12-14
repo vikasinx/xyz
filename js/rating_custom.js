@@ -1,11 +1,13 @@
 $(function() {
     var str_count = $('input[name=rating]').val();
     var buyerID = $('input[name="rating"]').attr('buyerID');
+    var pluginPath = $('input[name="rating"]').attr('pluginPath');
+    console.log(pluginPath);
     $("#rating_star_"+buyerID).rating_widget({
         starLength: '5',
         initialValue: str_count,
         callbackFunctionName: 'processRating',
-        imageDirectory: './wp-content/plugins/wc-author-rating/img/',
+        imageDirectory: pluginPath+'/img',
         inputAttr: '1',
         buyerID : buyerID     
     });
