@@ -37,11 +37,11 @@
                 $(this).children("span").addClass('dashicons-star-empty');
                 $(this).children("span").slice(0,f).removeClass('dashicons-star-empty');
                 $(this).children("span").slice(0,f).addClass('dashicons-star-filled');
-                /*console.log(ratingAVG);
+                console.log(ratingAVG);
                 if(ratingAVG % 1 != 0) {
                     $(this).children("span").slice(f,f+1).removeClass('dashicons-star-empty');
                     $(this).children("span").slice(f,f+1).addClass('dashicons-star-half');
-                }*/
+                }
 
             }
         });
