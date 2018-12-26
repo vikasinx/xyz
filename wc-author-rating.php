@@ -51,7 +51,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 * Step 1. Add Link (Tab) to My Account menu
 	 */
 	add_filter ( 'woocommerce_account_menu_items', 'add_buyer_rating_menu', 40 );
-	function add_buyer_rating_menu( $menu_links ){ 
+	function add_buyer_rating_menu( $menu_links ){
 		$menu_links = array_slice( $menu_links, 0, 5, true ) 
 		+ array( 'buyer-ratings' => 'Buyer Ratings' )
 		+ array_slice( $menu_links, 5, NULL, true ); 
@@ -61,7 +61,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 * Step 2. Register Permalink Endpoint
 	 */
 	add_action( 'init', 'add_buyer_rating_endpoints' );
-	function add_buyer_rating_endpoints() { 
+	function add_buyer_rating_endpoints() {
 		add_rewrite_endpoint( 'buyer-ratings', EP_PAGES ); 
 	}
 	/*
@@ -70,21 +70,27 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	add_action( 'woocommerce_account_buyer-ratings_endpoint', 'add_buyer_rating_menu_endpoints' );
 	function add_buyer_rating_menu_endpoints() {
 	 
-	 $args = array('role'=> 'shop_manager','order'=> 'DESC');
+	 /*$args = array('role'=> 'shop_manager','order'=> 'DESC');*/
+	 $args = array('role'=> 'vendor_admin','order'=> 'DESC');
 
 		global $wpdb;
 		global $wb;
 		$buyers = get_users($args);	
+
+		if(empty($buyers)) {
+			echo "<h3>No User found!!</h3>";
+		} else {
 			echo '<a class="all_buyers" href=?bid=all>All Buyers</a>';	
+		}
 
 		$buyer_IDS = array();
 		foreach ($buyers as $buyer) 
-		{	
+		{
 	    	$buyer_IDS[] = $buyer->ID;
-		} 
+		}
 		
 		if((!empty($_GET['bid'])) && (in_array($_GET['bid'],$buyer_IDS)))
-		{	
+		{
 			$b_ID 				= $_GET['bid'];
 			$userdata 			= get_userdata($b_ID);
 			$user_nicename 		= (!empty($userdata)) ? $userdata->user_nicename : '';
