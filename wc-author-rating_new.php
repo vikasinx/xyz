@@ -32,6 +32,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			  `authorid` int(11) NOT NULL,
 			  `buyerid` int(11) NOT NULL,
 			  `rating_number` int(11) NOT NULL,
+			  `review_comment` varchar(255) NOT NULL,
 			  `total_points` int(11) NOT NULL,
 			  `created` datetime NOT NULL,
 			  `modified` datetime NOT NULL,
@@ -77,22 +78,27 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 					<tr>
 						<td><p>Select User To Rate</p></td>
 					</tr>
-					<tr><td><select name="user_role">
-							<?php foreach ( $wp_roles->roles as $key=>$value ): ?>
-							<option value="<?php echo $key; ?>"  <?php if(!empty($selectedUser[0]->user_role)) { echo ($selectedUser[0]->user_role == $key)? 'selected="selected"' : ''; } ?>><?php echo $value['name']; ?></option>
-							<?php endforeach; ?>
-						</select></td>
+					<tr>
+						<td>
+							<select name="user_role">
+								<?php foreach ( $wp_roles->roles as $key=>$value ): ?>
+								<option value="<?php echo $key; ?>"  <?php if(!empty($selectedUser[0]->user_role)) { echo ($selectedUser[0]->user_role == $key)? 'selected="selected"' : ''; } ?>><?php echo $value['name']; ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
 					</tr>
 					<tr>
 						<td><p>Select User Who can Rate(multiple can be selected)</p></td>
 					</tr>
-					<tr><td><select multiple="multiple" name="voter_role[]">
-							<?php foreach ( $wp_roles->roles as $key=>$value ): ?>
-							<?php $selected = in_array( $key, $selectedVoter ) ? ' selected="selected" ' : ''; echo $selected; ?>
-
-							<option value="<?php echo $key; ?>"  <?php if(!empty($selected)) { echo $selected; } ?>><?php echo $value['name']; ?></option>
-							<?php endforeach; ?>
-						</select></td>
+					<tr>
+						<td>
+							<select multiple="multiple" name="voter_role[]">
+								<?php foreach ( $wp_roles->roles as $key=>$value ): ?>
+								<?php $selected = in_array( $key, $selectedVoter ) ? ' selected="selected" ' : ''; echo $selected; ?>
+								<option value="<?php echo $key; ?>"  <?php if(!empty($selected)) { echo $selected; } ?>><?php echo $value['name']; ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
 					</tr>				
 				</tbody>
 			</table>
@@ -157,7 +163,7 @@ function add_buyer_rating_menu_endpoints() {
 	
 	if(!in_array($cUrrentuser->roles[0], $userCanAcessPage)) {
 		echo "<h3>cheating uhh !!!  ;) You are not Allowed to view this page.</h3>";
-	} else {	
+	} else {
 
 		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "shop_manager";
 
@@ -187,11 +193,12 @@ function add_buyer_rating_menu_endpoints() {
 				$user_nicename 		= (!empty($userdata)) ? $userdata->user_nicename : '';
 
 				$result 			= get_buyer_ratings($b_ID);
+				$review_comment 	= (!empty($result[0]->review_comment)) ? $result[0]->review_comment : '';
 
 				$average_rating 	= (!empty($result)) ? $result[0]->average_rating : '';
 				$rating_number  	= (!empty($result[0]->rating_number)) ? $result[0]->rating_number : '';
 
-				echo '<div class="buyer_star_rating_wrapper">';
+				echo '<form id="author_review_submit" method="POST"><div class="buyer_star_rating_wrapper">';
 			   	echo '<span class="buyer_nickname">Rate '.$user_nicename.'</span>
 			   			<input name="rating" value="'.intval(floor($average_rating)).'" id="rating_star_'.$b_ID.'" type="hidden" postID="1" buyerID="'.$b_ID.'" ratingAVG="'.$average_rating.'" />';
 			   	if(empty($average_rating)){
@@ -200,6 +207,12 @@ function add_buyer_rating_menu_endpoints() {
 			   		echo'<div class="overall-rating">(Average Rating <span id="avgrat">'.$average_rating.'</span>
 		    		 Based on <span id="totalrat">'.$rating_number.'</span> rating)</span></div>';	    	
 			   	}
+			   	echo '<div class="review_comment">
+			   			<br/>
+			   			<label>Comment Your Review</label>
+			   			<textarea name="review_comment" id="review_comment">'.$review_comment.'</textarea>
+			   		  </div>';
+			   	echo '<br/><input type="submit" name="Submit" value="Submit Review" id="Submit">';
 			   	echo  '</div>';
 		    	
 			} else {
@@ -207,10 +220,12 @@ function add_buyer_rating_menu_endpoints() {
 				foreach ($buyer_IDS as $key => $value) {
 					echo '<a class="buyer_link" href=?bid='.$value.'>Rate buyer_'.$value.'</a>';
 				}
-				echo '</div>';
+				echo '</div></form>';
 			}
 		}
 }
+
+add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 
 	/*Inclue CSS and JS file*/
 
@@ -230,7 +245,7 @@ function add_buyer_rating_menu_endpoints() {
 	function get_buyer_ratings($bid)
 	{
 		global $wpdb;
-		$query = "SELECT buyerid, SUM(rating_number) as rating_number, AVG(FORMAT((total_points / rating_number),1)) as average_rating , authorid FROM  ".$wpdb->prefix."buyer_rating WHERE buyerid = $bid AND status = 1 GROUP BY buyerid";
+		$query = "SELECT buyerid,review_comment, SUM(rating_number) as rating_number, AVG(FORMAT((total_points / rating_number),1)) as average_rating , authorid FROM  ".$wpdb->prefix."buyer_rating WHERE buyerid = $bid AND status = 1 GROUP BY buyerid";
 		return $wpdb->get_results($query);
 	}
 
@@ -243,6 +258,7 @@ function add_buyer_rating_menu_endpoints() {
 		    $authorid = '1'; //$_POST['authorid'];
 		    //$buyerid = '4';
 		    $buyerid = $_POST['bid'];
+		    $rvw_cmt = $_POST['review_comment'];
 		    $rating_default_number = 1;
 		    $points = $_POST['points'];
 			global $wpdb;
@@ -256,11 +272,10 @@ function add_buyer_rating_menu_endpoints() {
 		        $points = $prevRatingResult['total_points'] + $points;
 
 			    //Update rating data into the database       
-			    $wpdb->update( $wpdb->prefix.'buyer_rating', array('rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( 'authorid' => $authorid, 'buyerid' => $buyerid),array( '%s', '%d','%s','%s','%s'),array( '%d','%d'));
-
+			    $wpdb->update( $wpdb->prefix.'buyer_rating', array('rating_number' => $rating_default_number,'total_points' => $points,'review_comment'=>$rvw_cmt,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( 'authorid' => $authorid, 'buyerid' => $buyerid),array( '%s', '%d','%s','%s','%s'),array( '%d','%d'));
 		    else:
 		        //Insert rating data into the database
-		        $wpdb->insert( $wpdb->prefix.'buyer_rating', array('authorid' => $authorid,'buyerid' => $buyerid, 'rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( '%s', '%d','%s','%s','%s'));
+		        $wpdb->insert( $wpdb->prefix.'buyer_rating', array('authorid' => $authorid,'buyerid' => $buyerid,'review_comment'=>$rvw_cmt, 'rating_number' => $rating_default_number,'total_points' => $points,'created' => date("Y-m-d H:i:s"),'modified' => date("Y-m-d H:i:s"),),array( '%s', '%d','%s','%s','%s'));	        
 		    endif;
 		    
 		    //Fetch rating deatails from database
@@ -271,7 +286,7 @@ function add_buyer_rating_menu_endpoints() {
 		        $ratingRow['status'] = 'ok';
 		    }else{
 		        $ratingRow['status'] = 'err';
-		    }  
+		    }
 		    echo $ratingRow['status'];
 		    die();
 		}
