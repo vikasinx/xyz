@@ -31,3 +31,25 @@ a.buyer_link {float: left;clear: left;}
     width: 100%;
     padding: 20px 0;
 }
+.all_buyer_review {
+    float: left;
+    width: 100%;
+}
+.all_buyer_review .buyer_star_rating {
+    float: left;
+    margin-right: 20px;
+    width: 100%;
+}
+.all_buyer_review .buyer_star_rating .buyer_name {
+    float: left;
+    margin-right: 20px;
+    min-width: 100px;
+}
+.all_buyer_review .buyer_star_rating .buyer_rating_comment_wrapper {
+    float: left;
+    margin-bottom: 30px;
+}
+.all_buyer_review .buyer_star_rating .buyer_rating_comment_wrapper ul.buyer_rating_ul {
+    margin-left: 0;
+    margin-bottom: 10px;
+}
