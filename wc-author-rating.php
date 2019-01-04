@@ -10,8 +10,8 @@ License: GPLv2
 */
 
 /**
- * Check if WooCommerce is active
- **/
+** Check if WooCommerce is active
+**/
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
 	/*Create Database on active plugin*/
@@ -170,28 +170,38 @@ function add_buyer_rating_menu_endpoints() {
 		echo "<h3>cheating uhh !!!  ;) You are not Allowed to view this page.</h3>";
 	} else {
 		$userRoleToRate = '';
-		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "shop_manager";
+		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "customer";
 
-		 /*$args = array('role'=> 'shop_manager','order'=> 'DESC');*/
-		 $args = array('role'=> $userRoleToRate,'order'=> 'DESC');
+/*		 $args = array('role'=> $userRoleToRate,'order'=> 'DESC');*/
 
 			global $wpdb;
 			global $wb;
-			$buyers = get_users($args);	
 
-			if(empty($buyers)) {
+			$args1 = array(
+			    'author'     =>  $cUrrentuser->ID,
+			    'post_type'  => 'product',
+			);
+
+			$author_posts = get_posts( $args1 );
+			$MyBuyers = '';
+			if(!empty($author_posts))
+			{							
+				$order_stats = array( 'wc-pending','wc-processing','wc-on-hold','wc-completed','wc-cancelled','wc-refunded','wc-failed' );
+				foreach ($author_posts as $value) {
+					$OrderIdbyProduct = get_orders_ids_by_product_id($value->ID,$order_stats);
+				}
+				foreach ($OrderIdbyProduct as $OIdbyP) {
+						$MyBuyers[] = get_customerorderid($OIdbyP);
+				}
+			}
+
+			if(empty($MyBuyers)) {
 				echo "<h3>No User found!!</h3>";
 			} else {
 				echo '<a class="all_buyers" href=?bid=all>All Buyers</a>';	
 			}
-
-			$buyer_IDS = array();
-			foreach ($buyers as $buyer) 
-			{
-		    	$buyer_IDS[] = $buyer->ID;
-			}
 			
-			if((!empty($_GET['bid'])) && (in_array($_GET['bid'],$buyer_IDS)))
+			if((!empty($_GET['bid'])) && (in_array($_GET['bid'],$MyBuyers)))
 			{
 				$b_ID 						= $_GET['bid'];
 				$userdata 					= get_userdata($b_ID);
@@ -249,7 +259,7 @@ function add_buyer_rating_menu_endpoints() {
 		    	
 			} else {
 				echo '<div class="buyers_list">';
-				foreach ($buyer_IDS as $key => $value) {
+				foreach ($MyBuyers as $key => $value) {
 					echo '<a class="buyer_link" href=?bid='.$value.'>Rate buyer_'.$value.'</a>';
 				}
 				echo '</div></form>';
@@ -343,6 +353,49 @@ add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 	}
 
 
- /*check if woocommerce plugin is active*/
+/*Get Order ID by product id*/
+function get_orders_ids_by_product_id( $product_id, $order_status ){
+    global $wpdb;
+
+    $orderids = $wpdb->get_col("
+        SELECT order_items.order_id
+        FROM {$wpdb->prefix}woocommerce_order_items as order_items
+        LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+        LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+        WHERE posts.post_type = 'shop_order'
+        AND posts.post_status IN ( '" . implode( "','", $order_status ) . "' )
+        AND order_items.order_item_type = 'line_item'
+        AND order_item_meta.meta_key = '_product_id'
+        AND order_item_meta.meta_value = '$product_id'
+    ");
+
+    return $orderids;
 }
+
+/*Get customers ID by order id*/
+
+function get_customerorderid($order_id){
+
+    // Get an instance of the WC_Order object
+    $order = wc_get_order($order_id);
+
+    // Get the user ID from WC_Order methods
+    $user_id = $order->get_user_id(); // or $order->get_customer_id();
+
+    return $user_id;
+}
+
+} else {
+
+	function woocommerce_plugin_missing_notice() {
+			echo '<div class="error"><p>' . sprintf( esc_html__( 'WooCommerce Author Rating requires WooCommerce to be installed and active.', 'wc-author-rating' )) . '</p></div>';
+		}
+	add_action( 'admin_notices', 'woocommerce_plugin_missing_notice');
+}
+
+/*Load Dashicons for All user roles*/
+function ww_load_dashicons(){
+    wp_enqueue_style('dashicons');
+}
+add_action('wp_enqueue_scripts', 'ww_load_dashicons');
 ?>
