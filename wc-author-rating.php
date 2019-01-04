@@ -185,7 +185,7 @@ function add_buyer_rating_menu_endpoints() {
 			$author_posts = get_posts( $args1 );
 			$MyBuyers = '';
 			if(!empty($author_posts))
-			{							
+			{
 				$order_stats = array( 'wc-pending','wc-processing','wc-on-hold','wc-completed','wc-cancelled','wc-refunded','wc-failed' );
 				foreach ($author_posts as $value) {
 					$OrderIdbyProduct = get_orders_ids_by_product_id($value->ID,$order_stats);
@@ -240,7 +240,6 @@ function add_buyer_rating_menu_endpoints() {
 				   		$authorUserdata 			= get_userdata($ratingAuthorId);
 						$ratingAuthor 				= (!empty($authorUserdata)) ? $authorUserdata->user_nicename : '';
 
-
 				   		echo '<div class="buyer_star_rating"><div class="buyer_name">'.$ratingAuthor.'</div>
 				   			<div class="buyer_rating_comment_wrapper"><ul class="buyer_rating_ul">';
 				   		for($i=0;$i<=4;$i++)
@@ -259,8 +258,10 @@ function add_buyer_rating_menu_endpoints() {
 		    	
 			} else {
 				echo '<div class="buyers_list">';
-				foreach ($MyBuyers as $key => $value) {
-					echo '<a class="buyer_link" href=?bid='.$value.'>Rate buyer_'.$value.'</a>';
+				if(!empty($MyBuyers)) {
+					foreach ($MyBuyers as $key => $value) {
+						echo '<a class="buyer_link" href=?bid='.$value.'>Rate buyer_'.$value.'</a>';
+					}
 				}
 				echo '</div></form>';
 			}
