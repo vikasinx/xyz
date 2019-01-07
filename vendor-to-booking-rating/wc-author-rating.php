@@ -10,8 +10,8 @@ License: GPLv2
 */
 
 /**
- * Check if WooCommerce is active
- **/
+** Check if WooCommerce is active
+**/
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
 	/*Create Database on active plugin*/
@@ -69,7 +69,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		global $wp_roles;
      	$roles = $wp_roles->get_names(); 
      	$selectedUser = get_selected_user_role();
-     	$selectedVoter = explode(",", $selectedUser[0]->voter_role);
+     	if($selectedUser){
+     		$selectedVoter = explode(",", $selectedUser[0]->voter_role);
+     	}
      	?>
      	<h2>User Rating Settings</h2>
      	<form id="user_roles" method="POST">     		
@@ -113,9 +115,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
 			if(empty($selectedUser[0]->user_role)){
 				$wpdb->insert( $wpdb->prefix.'user_selection', array('user_role' => $userRole,'voter_role' => $voterRole),array( '%s','%s'));
-			} else {			
+			} else {
 				$wpdb->update($wpdb->prefix.'user_selection',array('user_role' => $userRole,'voter_role' => $voterRole),array( 'id' => 1 ),array('%s'),array( '%d' ));
-
 			}
 		}
 	}
@@ -131,7 +132,7 @@ function get_selected_user_role(){
 	 * Step 1. Add Link (Tab) to My Account menu
 	 */
 	add_filter ( 'woocommerce_account_menu_items', 'add_buyer_rating_menu', 40 );
-	function add_buyer_rating_menu( $menu_links ){		
+	function add_buyer_rating_menu( $menu_links ){
 		$menu_links = array_slice( $menu_links, 0, 5, true ) 
 		+ array( 'buyer-ratings' => 'Buyer Ratings' )
 		+ array_slice( $menu_links, 5, NULL, true ); 
@@ -139,9 +140,11 @@ function get_selected_user_role(){
 	/*Check If user is Allowed to vote*/
 		$cUser = wp_get_current_user();
 		$userCanRate = get_selected_user_role();
+		if($userCanRate) {
 		$CanVote = explode(",", $userCanRate[0]->voter_role);
-		if(!in_array($cUser->roles[0], $CanVote)) {
-        	unset($menu_links['buyer-ratings']);
+			if(!in_array($cUser->roles[0], $CanVote)) {
+	        	unset($menu_links['buyer-ratings']);
+			}
 		}
 		return $menu_links; 
 	}
@@ -159,44 +162,58 @@ add_action( 'woocommerce_account_buyer-ratings_endpoint', 'add_buyer_rating_menu
 function add_buyer_rating_menu_endpoints() {
 	$cUrrentuser 			= 	wp_get_current_user();
 	$userToRate 			= 	get_selected_user_role();
-	$userCanAcessPage 		=  	explode(",", $userToRate[0]->voter_role);
+	if($userToRate ) :
+		$userCanAcessPage 	=  	explode(",", $userToRate[0]->voter_role);
+	endif;
 	
-	if(!in_array($cUrrentuser->roles[0], $userCanAcessPage)) {
+	if((isset($userCanAcessPage)) && (!in_array($cUrrentuser->roles[0], $userCanAcessPage))) {
 		echo "<h3>cheating uhh !!!  ;) You are not Allowed to view this page.</h3>";
 	} else {
+		$userRoleToRate = '';
+		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "customer";
 
-		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "shop_manager";
-
-		 /*$args = array('role'=> 'shop_manager','order'=> 'DESC');*/
-		 $args = array('role'=> $userRoleToRate,'order'=> 'DESC');
+/*		 $args = array('role'=> $userRoleToRate,'order'=> 'DESC');*/
 
 			global $wpdb;
 			global $wb;
-			$buyers = get_users($args);	
+			$author_posts 	= '';
+			$MyBuyers 		= array();
+			$bookigIDs 		= array();
 
-			if(empty($buyers)) {
+			$args1 = array(
+			    'author'     =>  $cUrrentuser->ID,
+			    'post_type'  => 'product',
+			);
+
+			$author_posts = get_posts( $args1 );
+			
+			if(!empty($author_posts))
+			{
+				foreach ($author_posts as $value) {
+					$OrderIdbyProduct = get_orders_ids_by_product_id($value->ID,$order_status = array( 'wc-completed'));
+					$bookigIDs[] = get_bookingId($OrderIdbyProduct);
+				}
+				/*foreach ($OrderIdbyProduct as $OIdbyP) {
+						$MyBuyers[] = get_customerorderid($OIdbyP);
+				}*/
+			}
+
+			if(empty($bookigIDs)) {
 				echo "<h3>No User found!!</h3>";
 			} else {
 				echo '<a class="all_buyers" href=?bid=all>All Buyers</a>';	
 			}
-
-			$buyer_IDS = array();
-			foreach ($buyers as $buyer) 
+			if((!empty($_GET['bid'])) && (in_array($_GET['bid'],$bookigIDs[0])))
 			{
-		    	$buyer_IDS[] = $buyer->ID;
-			}
-			
-			if((!empty($_GET['bid'])) && (in_array($_GET['bid'],$buyer_IDS)))
-			{
-				$b_ID 				= $_GET['bid'];
-				$userdata 			= get_userdata($b_ID);
-				$user_nicename 		= (!empty($userdata)) ? $userdata->user_nicename : '';
+				$b_ID 						= $_GET['bid'];
+				$userdata 					= get_userdata($b_ID);
+				$user_nicename 				= (!empty($userdata)) ? $userdata->user_nicename : '';
 
-				$result 			= get_buyer_ratings($b_ID);
-				$review_comment 	= (!empty($result[0]->review_comment)) ? $result[0]->review_comment : '';
-
-				$average_rating 	= (!empty($result)) ? $result[0]->average_rating : '';
-				$rating_number  	= (!empty($result[0]->rating_number)) ? $result[0]->rating_number : '';
+				$result 					= get_buyer_ratings($b_ID);
+				$result_review_comment 		= get_buyer_review_comment($b_ID);
+				$review_comment 			= (!empty($result_review_comment[0]->review_comment)) ? $result_review_comment[0]->review_comment : '';
+				$average_rating 			= (!empty($result)) ? $result[0]->average_rating : '';
+				$rating_number  			= (!empty($result[0]->rating_number)) ? $result[0]->rating_number : '';
 
 				echo '<form id="author_review_submit" method="POST"><div class="buyer_star_rating_wrapper">';
 			   	echo '<span class="buyer_nickname">Rate '.$user_nicename.'</span>
@@ -214,11 +231,39 @@ function add_buyer_rating_menu_endpoints() {
 			   		  </div>';
 			   	echo '<br/><input type="submit" name="Submit" value="Submit Review" id="Submit">';
 			   	echo  '</div>';
+
+			   	/*$buyer_all_rating 					= buyer_all_ratings($b_ID);
+			   	if(!empty($buyer_all_rating)) {
+				   	echo '<div class="all_buyer_review"><h3>Reviews</h3>';
+				   	foreach ($buyer_all_rating as $bRating) {
+				   		$bRating_number 			= $bRating->total_points;
+				   		$ratingAuthorId 			= $bRating->authorid;
+
+				   		$authorUserdata 			= get_userdata($ratingAuthorId);
+						$ratingAuthor 				= (!empty($authorUserdata)) ? $authorUserdata->user_nicename : '';
+
+				   		echo '<div class="buyer_star_rating"><div class="buyer_name">'.$ratingAuthor.'</div>
+				   			<div class="buyer_rating_comment_wrapper"><ul class="buyer_rating_ul">';
+				   		for($i=0;$i<=4;$i++)
+				   		{
+				   			if(($bRating_number <= $i)){
+				   				echo '<span class="dashicons dashicons-star-empty"></span>';
+				   			} else {
+				   				echo '<span class="dashicons dashicons-star-filled"></span>';
+				   			}			   					
+				   		}
+				   		echo '</ul>
+				   			  <div class="buyer_review_comment">'.$bRating->review_comment.'</div></div>';
+				   	}
+				   	echo '</div>';
+				}*/
 		    	
 			} else {
 				echo '<div class="buyers_list">';
-				foreach ($buyer_IDS as $key => $value) {
-					echo '<a class="buyer_link" href=?bid='.$value.'>Rate buyer_'.$value.'</a>';
+				if(!empty($bookigIDs[0])) {
+					foreach ($bookigIDs[0] as $key => $value) {
+						echo '<div><span>Rate Buyer </span><a class="buyer_link" href=?bid='.$value.'>Booking ID #'.$value.'</a></div>';
+					}
 				}
 				echo '</div></form>';
 			}
@@ -245,7 +290,15 @@ add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 	function get_buyer_ratings($bid)
 	{
 		global $wpdb;
-		$query = "SELECT buyerid,review_comment, SUM(rating_number) as rating_number, AVG(FORMAT((total_points / rating_number),1)) as average_rating , authorid FROM  ".$wpdb->prefix."buyer_rating WHERE buyerid = $bid AND status = 1 GROUP BY buyerid";
+		$query = "SELECT buyerid, SUM(rating_number) as rating_number, AVG(FORMAT((total_points / rating_number),1)) as average_rating , authorid FROM  ".$wpdb->prefix."buyer_rating WHERE buyerid = $bid AND status = 1 GROUP BY buyerid";
+		return $wpdb->get_results($query);
+	}
+
+	function get_buyer_review_comment($bid)
+	{
+		$Ccuthorid = current_author();
+		global $wpdb;
+		$query = "SELECT review_comment FROM  ".$wpdb->prefix."buyer_rating WHERE buyerid = $bid AND authorid = $Ccuthorid";
 		return $wpdb->get_results($query);
 	}
 
@@ -255,8 +308,7 @@ add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 	function rate_buyer() {
 
 		if(!empty($_POST['points'])){
-		    $authorid = '1'; //$_POST['authorid'];
-		    //$buyerid = '4';
+		    $authorid = current_author();
 		    $buyerid = $_POST['bid'];
 		    $rvw_cmt = $_POST['review_comment'];
 		    $rating_default_number = 1;
@@ -291,6 +343,101 @@ add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 		    die();
 		}
 	}
- /*check if woocommerce plugin is active*/
+
+	function current_author(){
+		$CurrAuthor = wp_get_current_user();
+		return $CurrAuthor->ID;
+	}
+
+	function buyer_all_ratings($bid){
+		global $wpdb;
+		$booking_review = '';
+
+		$all_rating_query = "SELECT total_points,review_comment , authorid FROM ". $wpdb->prefix."buyer_rating WHERE buyerid=".$bid;
+		$result =  $wpdb->get_results($all_rating_query);
+
+		if(!empty($result)){
+			$booking_review =  '<div class="all_buyer_review">';
+		   	foreach ($result as $bRating) {
+		   		$bRating_number 			= $bRating->total_points;
+		   		$ratingAuthorId 			= $bRating->authorid;
+
+		   		$authorUserdata 			= get_userdata($ratingAuthorId);
+				$ratingAuthor 				= (!empty($authorUserdata)) ? $authorUserdata->user_nicename : '';
+
+		   		$booking_review .=  '<div class="buyer_star_rating"><div class="buyer_name">'.$ratingAuthor.'</div>
+		   			<div class="buyer_rating_comment_wrapper"><ul class="buyer_rating_ul">';
+		   		for($i=0;$i<=4;$i++)
+		   		{
+		   			if(($bRating_number <= $i)){
+		   				$booking_review .=  '<span class="dashicons dashicons-star-empty"></span>';
+		   			} else {
+		   				$booking_review .=  '<span class="dashicons dashicons-star-filled"></span>';
+		   			}			   					
+		   		}
+		   		$booking_review .=  '</ul>
+		   			  <div class="buyer_review_comment">'.$bRating->review_comment.'</div></div>';
+		   	}
+		   	$booking_review .=  '</div>';
+		   }
+		   return $booking_review;
+	}
+
+
+/*Get Order ID by product id*/
+function get_orders_ids_by_product_id( $product_id, $order_status ){
+    global $wpdb;
+
+    $orderids = $wpdb->get_col("
+        SELECT order_items.order_id
+        FROM {$wpdb->prefix}woocommerce_order_items as order_items
+        LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+        LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
+        WHERE posts.post_type = 'shop_order'
+        AND posts.post_status IN ( '" . implode( "','", $order_status ) . "' )
+        AND order_items.order_item_type = 'line_item'
+        AND order_item_meta.meta_key = '_product_id'
+        AND order_item_meta.meta_value = '$product_id'
+    ");
+
+    return $orderids;
 }
+
+/*Get customers ID by order id*/
+
+function get_customerorderid($order_id){
+
+    // Get an instance of the WC_Order object
+    $order = wc_get_order($order_id);
+
+    // Get the user ID from WC_Order methods
+    $user_id = $order->get_user_id(); // or $order->get_customer_id();
+
+    return $user_id;
+}
+
+
+/*Get Booking ID by order id*/
+
+function get_bookingId($order_id){
+
+    $booking_data = new WC_Booking_Data_Store();
+	$booking_ids = $booking_data->get_booking_ids_from_order_id( $order_id );
+
+    return $booking_ids;
+}
+
+} else {
+
+	function woocommerce_plugin_missing_notice() {
+			echo '<div class="error"><p>' . sprintf( esc_html__( 'WooCommerce Author Rating requires WooCommerce to be installed and active.', 'wc-author-rating' )) . '</p></div>';
+		}
+	add_action( 'admin_notices', 'woocommerce_plugin_missing_notice');
+}
+
+/*Load Dashicons for All user roles*/
+function ww_load_dashicons(){
+    wp_enqueue_style('dashicons');
+}
+add_action('wp_enqueue_scripts', 'ww_load_dashicons');
 ?>

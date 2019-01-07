@@ -1,0 +1,64 @@
+.rating_widget{
+    padding: 0px;
+    margin: 0px;
+    float: left;
+}
+.rating_widget li{
+    line-height: 0px;
+    width: 28px;
+    height: 28px;
+    padding: 0px;
+    margin: 0px;
+    margin-left: 2px;
+    list-style: none;
+    float: left;
+    cursor: pointer;
+}
+.rating_widget li span{
+    display: none;
+}
+.overall-rating{font-size: 14px;margin-top: 5px;color: #8e8d8d;}
+span.buyer_nickname { float: left; margin-right: 20px;}
+a.all_buyers {float: left; margin-right: 20px;font-weight: 600;font-size: 20px;text-decoration: underline;}
+a.buyer_link {float: left;}
+.buyer_star_rating_wrapper {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}
+.buyers_list {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}
+.all_buyer_review {
+    float: left;
+    width: 100%;
+}
+.all_buyer_review .buyer_star_rating {
+    float: left;
+    margin-right: 20px;
+    width: 100%;
+}
+.all_buyer_review .buyer_star_rating .buyer_name {
+    float: left;
+    width: 15%;
+    min-width: 100px;
+    padding-right: 15px;
+}
+.all_buyer_review .buyer_star_rating .buyer_rating_comment_wrapper {
+    float: left;
+    margin-bottom: 30px;
+    width:80%;
+}
+.all_buyer_review .buyer_star_rating .buyer_rating_comment_wrapper ul.buyer_rating_ul {
+    margin-left: 0;
+    margin-bottom: 10px;
+}
+.buyers_list span {
+    float: left;
+}
+.buyers_list div {
+    float: left;
+    width: 100%;
+}
