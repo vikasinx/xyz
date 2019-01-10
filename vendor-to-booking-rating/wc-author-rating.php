@@ -169,6 +169,7 @@ function add_buyer_rating_menu_endpoints() {
 	if((isset($userCanAcessPage)) && (!in_array($cUrrentuser->roles[0], $userCanAcessPage))) {
 		echo "<h3>cheating uhh !!!  ;) You are not Allowed to view this page.</h3>";
 	} else {
+		global $userRole;
 		$userRoleToRate = '';
 		 (!empty($userToRate)) ? $userRoleToRate = $userToRate[0]->user_role : "customer";
 
@@ -191,7 +192,7 @@ function add_buyer_rating_menu_endpoints() {
 			{
 				foreach ($author_posts as $value) {
 					$OrderIdbyProduct = get_orders_ids_by_product_id($value->ID,$order_status = array( 'wc-completed'));
-					$bookigIDs[] = get_bookingId($OrderIdbyProduct);
+					$bookigIDs[] = get_bookingId($OrderIdbyProduct);					
 				}
 				/*foreach ($OrderIdbyProduct as $OIdbyP) {
 						$MyBuyers[] = get_customerorderid($OIdbyP);
@@ -262,7 +263,12 @@ function add_buyer_rating_menu_endpoints() {
 				echo '<div class="buyers_list">';
 				if(!empty($bookigIDs[0])) {
 					foreach ($bookigIDs[0] as $key => $value) {
-						echo '<div><span>Rate Buyer </span><a class="buyer_link" href=?bid='.$value.'>Booking ID #'.$value.'</a></div>';
+
+						$wcBooking 		= new WC_Booking($value);
+						$start_date 	= $wcBooking->get_start_date();
+						$end_date 		= $wcBooking->get_end_date();
+
+						echo '<div><span style="margin-right:10px;"><strong>Rate Buyer - </strong></span><a class="buyer_link" href=?bid='.$value.'>Booking ID #'.$value.'</a><span style="margin-left:10px;"><strong>Booking Date : </strong></span><span class="start_date">'.$start_date.' - </span><span class="end_date">'.$end_date.'</span></div>';
 					}
 				}
 				echo '</div></form>';
@@ -382,6 +388,21 @@ add_shortcode( 'author-rating', 'add_buyer_rating_menu_endpoints' );
 		   }
 		   return $booking_review;
 	}
+
+function booking_review_exists($bookingId){
+
+	global $wpdb;
+	$booking_review = '';
+
+	$booking_check_query = "SELECT total_points,review_comment , authorid FROM ". $wpdb->prefix."buyer_rating WHERE buyerid=".$bookingId;
+	$booking_exists =  $wpdb->get_results($booking_check_query);
+	if(!empty($booking_exists)){
+		return 'review_exists';
+	} else {
+		return 'no_review';
+	}
+
+}
 
 
 /*Get Order ID by product id*/

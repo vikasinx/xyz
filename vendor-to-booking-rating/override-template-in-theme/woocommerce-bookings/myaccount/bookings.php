@@ -40,7 +40,13 @@ if ( ! empty( $tables ) ) : ?>
 					<th scope="col" class="booking-end-date"><?php _e( 'End Date', 'woocommerce-bookings' ); ?></th>
 					<th scope="col" class="booking-status"><?php _e( 'Status', 'woocommerce-bookings' ); ?></th>
 					<th scope="col" class="booking-cancel"></th>
+					<?php $bookingStatus = array();
+					 foreach ($table['bookings'] as $key => $value) {
+						$bookingStatus[] = booking_review_exists($value->get_id()); }
+						if (in_array("review_exists", $bookingStatus)) {
+						?>
 					<th scope="col" class="booking-cancel">Booking Reviews</th>
+				<?php } ?>
 				</tr>
 			</thead>
 			<tbody>
