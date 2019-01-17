@@ -1,0 +1,67 @@
+.rating_widget{
+    padding: 0px;
+    margin: 0px;
+    float: left;
+}
+.rating_widget li{
+    line-height: 0px;
+    width: 28px;
+    height: 28px;
+    padding: 0px;
+    margin: 0px;
+    margin-left: 2px;
+    list-style: none;
+    float: left;
+    cursor: pointer;
+}
+.rating_widget li span{
+    display: none;
+}
+.overall-rating{font-size: 14px;margin-top: 5px;color: #8e8d8d;}
+span.customer_nickname { float: left; margin-right: 20px;}
+a.all_customers {float: left; margin-right: 20px;font-weight: 600;font-size: 20px;text-decoration: underline;}
+a.customer_link {float: left;}
+.customer_star_rating_wrapper {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}
+.customers_list {
+    float: left;
+    width: 100%;
+    padding: 20px 0;
+}
+.all_customer_review {
+    float: left;
+    width: 100%;
+}
+.all_customer_review .customer_star_rating {
+    float: left;
+    margin-right: 20px;
+    width: 100%;
+}
+.all_customer_review .customer_star_rating .customer_name {
+    float: left;
+    width: 15%;
+    min-width: 100px;
+    padding-right: 15px;
+}
+.all_customer_review .customer_star_rating .customer_rating_comment_wrapper {
+    float: left;
+    margin-bottom: 30px;
+    width:80%;
+}
+.all_customer_review .customer_star_rating .customer_rating_comment_wrapper ul.customer_rating_ul {
+    margin-left: 0;
+    margin-bottom: 10px;
+}
+.customers_list span {
+    float: left;
+}
+.customers_list div {
+    float: left;
+    width: 100%;
+}
+span.brating .customer_name {
+    display: none;
+}

@@ -12,6 +12,17 @@ License: GPLv2
 /**
 ** Check if WooCommerce is active
 **/
+
+/*foreach($booking_ids as $booking_id) {
+						$booking 			= new WC_Booking($booking_id);
+						$bookingProductID 	= $booking->get_product()->get_id();
+
+						if (($booking->get_status() == 'complete') && (in_array($bookingProductID, $product_ids))) {
+							$start_date 	= $booking->get_start_date();
+							$end_date 		= $booking->get_end_date();
+							echo '<div><span style="margin-right:10px;"></span><a class="customer_link" href=?bid=' . $booking_id . '>Booking ID #' . $booking_id . '</a><span style="margin-left:10px;"><strong>Booking Dates: </strong></span><span class="start_date">' . $start_date . '  -  </span><span class="end_date">' . $end_date . '</span><span class="brating">'.customer_all_ratings($booking_id).'</span></div>';
+						}
+				}*/
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
 	/*Create Database on active plugin*/
@@ -201,6 +212,7 @@ function add_buyer_rating_menu_endpoints() {
 				foreach ($all_bookings as $b => $bk) {
 					$bookings  = get_wc_booking($bk->ID);
 					$bk_ID = $bookings ->product_id;
+
 					if(in_array($bk_ID, $productIDS))
 					{
 						
