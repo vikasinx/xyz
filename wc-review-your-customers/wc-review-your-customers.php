@@ -210,7 +210,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 			wp_register_style('customer-rating', plugins_url('css/rating.css', __FILE__));
 			wp_enqueue_style('customer-rating');
 			//this line breaks the vendor dashboard's features if run globally. Please check.
-			wp_enqueue_script( 'jquery-lib',  'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js', array( 'jquery' ) ); 
+			/* wp_enqueue_script( 'jquery-lib',  'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js', array( 'jquery' ) );  */
 
 			wp_enqueue_script('customer-rating', plugins_url('js/rating.js', __FILE__) , array(
 			'jquery'
@@ -388,18 +388,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 		return $orderids;
 	}
 
-	/*Get customers ID by order id*/
-	/*function get_customerorderid($order_id){
-
-	// Get an instance of the WC_Order object
-
-	$order = wc_get_order($order_id);
-
-	// Get the user ID from WC_Order methods
-
-	$user_id = $order->get_user_id(); // or $order->get_customer_id();
-	return $user_id;
-	}*/
 	/*Get booking ids from order id*/
 	function get_booking_ids($order_id)
 	{
