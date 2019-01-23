@@ -190,7 +190,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 						if (($booking->get_status() == 'complete') && (in_array($bookingProductID, $product_ids))) {
 							$start_date 	= $booking->get_start_date();
 							$end_date 		= $booking->get_end_date();
-							echo '<div><span style="margin-right:10px;"></span><a class="customer_link" href=?bid=' . $booking_id . '>Booking ID #' . $booking_id . '</a><span style="margin-left:10px;"><strong>Booking Dates: </strong></span><span class="start_date">' . $start_date . '  -  </span><span class="end_date">' . $end_date . '</span><span class="brating">'.customer_all_ratings($booking_id).'</span></div>';
+							echo '<div style="float:left;width:100%;"><span style="margin-right:10px;"></span><a class="customer_link" href=?bid=' . $booking_id . '>ID #' . $booking_id . '</a><span style="margin-left:10px;"><strong>Booking Dates: </strong></span><span class="start_date">' . $start_date . '  -  </span><span class="end_date">' . $end_date . '</span><span class="brating">'.customer_all_ratings($booking_id).'</span></div>';
 						}
 					/*}*/
 				}
@@ -200,17 +200,17 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 		}
 	}
 
-	add_shortcode('author-rating', 'add_customer_rating_menu_endpoints');
+	add_shortcode('ryc-reviews-vendor', 'add_customer_rating_menu_endpoints');
 	
 	/*Include CSS and JS file*/
 	add_action('wp_enqueue_scripts', 'customer_ratings_enqueue_func');
 	function customer_ratings_enqueue_func()
 	{
-		if (is_account_page()){
+		/*if (is_account_page()){*/
 			wp_register_style('customer-rating', plugins_url('css/rating.css', __FILE__));
 			wp_enqueue_style('customer-rating');
 			//this line breaks the vendor dashboard's features if run globally. Please check.
-			/* wp_enqueue_script( 'jquery-lib',  'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js', array( 'jquery' ) );  */
+			/*wp_enqueue_script( 'jquery-lib',  'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js', array( 'jquery' ) ); */
 
 			wp_enqueue_script('customer-rating', plugins_url('js/rating.js', __FILE__) , array(
 			'jquery'
@@ -221,7 +221,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 			wp_localize_script('rating_custom', 'my_ajax_object', array(
 			'ajax_url' => admin_url('admin-ajax.php')
 			));
-		}
+		/*}*/
 		
 	}
 	/*Load dashicons for all user roles*/
