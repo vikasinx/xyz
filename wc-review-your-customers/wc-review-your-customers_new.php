@@ -75,7 +75,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         ) + array_slice($menu_links, 5, null, true);
         //Check If user is allowed to review
         $current_user = wp_get_current_user();
-        $userCanRate = 'administrator,wc_product_vendors_admin_vendor,wc_product_vendors_manager_vendor';
+        $userCanRate = 'administrator,wc_product_vendors_admin_vendor,wc_product_vendors_manager_vendor,wcfm_vendor';
         if ($userCanRate) {
             $CanVote = explode(",", $userCanRate);
             if (!in_array($current_user->roles[0], $CanVote)) {
@@ -163,10 +163,9 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 }
             }*/
             $booking_ids = array_flatten($booking_ids);
-            
             /*print_r($booking_ids);*/
 
-            if (empty($booking_ids)) {
+            if ((empty($booking_ids)) || ($booking_ids[0] == 0)) {
                 echo '<p>' . __('There are no bookings available.', 'woocommerce-product-vendors') . '</p>';
             }
 
@@ -191,7 +190,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 echo '<br/><input type="submit" name="Submit" value="Submit" id="Submit">';
                 echo '<p><a class="all_customers" href=?bid=all>Back to all reviews</a></p>';
                 echo '</div>';
-            } else {
+            } elseif($booking_ids[0] != 0) {
                 echo '<div class="customers_list">';
                 if(!empty($booking_ids)) {
                     echo '<table id="wcfm-bookings" class="display dataTable dtr-inline" cellspacing="0" width="100%" role="grid" aria-describedby="wcfm-bookings_info" style="width: 100%;">
@@ -217,32 +216,32 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                                     foreach ($booking_ids as $booking_id) {
                                         /*foreach($booking_id as $booking_id2) {*/
                                         $booking 			= new WC_Booking($booking_id);
-                                        $bookingProductID 	= $booking->get_product()->get_id(); //WCPV
-                                        $bookingProductName = get_the_title($bookingProductID);
+                                            $bookingProductID 	= $booking->get_product()->get_id(); //WCPV
+                                            $bookingProductName = get_the_title($bookingProductID);
 
-                                        /*Get order Status*/
+                                            /*Get order Status*/
+                                            $bookingOrder       = wc_get_order( $booking->order_id );
+                                            $bookingOrderData   = $bookingOrder->get_data(); // The Order data
+                                            $bookingOrderStatus = $bookingOrderData['status'];
 
-                                        $bookingOrder       = wc_get_order( $booking->order_id );
-                                        $bookingOrderData   = $bookingOrder->get_data(); // The Order data
-                                        $bookingOrderStatus = $bookingOrderData['status'];
 
-
-                                        if ($booking->get_status() == 'complete') {
-                                        //if (($booking->get_status() == 'complete') && (in_array($bookingProductID, $product_ids))) {WCPV
-                                            $start_date 	= $booking->get_start_date();
-                                            $end_date 		= $booking->get_end_date();
-                                            $bookingRating = customer_all_ratings($booking_id);
-                                            if(empty($bookingRating)) { $bookingRating = 'No Rating'; }
-                                            /*echo '<div style="float:left;width:100%;"><span style="margin-right:10px;"></span><a class="customer_link" href=?bid=' . $booking_id . '>ID #' . $booking_id . '</a><span style="margin-left:10px;"><strong>Booking Dates: </strong></span><span class="start_date">' . $start_date . '  -  </span><span class="end_date">' . $end_date . '</span><span class="brating">'.customer_all_ratings($booking_id).'</span></div>';*/
-                                            echo '
-                                    <tr role="row" class="odd">
-                                        <td class="sorting_1" tabindex="0"><span class="order-status tips wcicon-status-completed text_tip" data-tip="Completed" data-hasqtip="85" aria-describedby="qtip-85"></span></td>
-                                        <td><a href=?bid=' . $booking_id . '>ID #' . $booking_id . '</a></td>
-                                        <td>'.$bookingProductName.'</td>
-                                        <td><span class="booking-orderno">#'.$booking->order_id.'</span><br>'.$bookingOrderStatus.'</td>
-                                        <td>' . $start_date . '</td><td>' . $end_date . '</td>
-                                        <td><span class="brating">'.$bookingRating.'</span></td></tr>';
-                                        }
+                                            if ($booking->get_status() == 'complete') {
+                                                //if (($booking->get_status() == 'complete') && (in_array($bookingProductID, $product_ids))) {WCPV
+                                                $start_date 	= $booking->get_start_date();
+                                                $end_date 		= $booking->get_end_date();
+                                                $bookingRating = customer_all_ratings($booking_id);
+                                                if(empty($bookingRating)) { $bookingRating = 'No Rating'; }
+                                                /*echo '<div style="float:left;width:100%;"><span style="margin-right:10px;"></span><a class="customer_link" href=?bid=' . $booking_id . '>ID #' . $booking_id . '</a><span style="margin-left:10px;"><strong>Booking Dates: </strong></span><span class="start_date">' . $start_date . '  -  </span><span class="end_date">' . $end_date . '</span><span class="brating">'.customer_all_ratings($booking_id).'</span></div>';*/
+                                                echo '
+                                                    <tr role="row" class="odd">
+                                                        <td class="sorting_1" tabindex="0"><span class="order-status tips wcicon-status-completed text_tip" data-tip="Completed" data-hasqtip="85" aria-describedby="qtip-85"></span></td>
+                                                        <td><a href=?bid=' . $booking_id . '>ID #' . $booking_id . '</a></td>
+                                                        <td>'.$bookingProductName.'</td>
+                                                        <td><span class="booking-orderno">#'.$booking->order_id.'</span><br>'.$bookingOrderStatus.'</td>
+                                                        <td>' . $start_date . '</td><td>' . $end_date . '</td>
+                                                        <td><span class="brating">'.$bookingRating.'</span></td>
+                                                    </tr>';
+                                            }
                                         /*}*/
                                     }
                             echo '</tbody>
