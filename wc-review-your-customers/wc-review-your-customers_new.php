@@ -128,8 +128,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     function add_customer_rating_menu_endpoints()
     {
         $current_user = wp_get_current_user();
+        $currentUserRole = array_shift($current_user->roles);
+
         $userCanAcessPage = array('administrator','wc_product_vendors_admin_vendor','wc_product_vendors_manager_vendor','wcfm_vendor');
-        if ((isset($userCanAcessPage)) && (!in_array($current_user->roles[0], $userCanAcessPage))) {
+        if ((isset($userCanAcessPage)) && (!in_array($currentUserRole, $userCanAcessPage))) {
             echo "<h3>Sorry you are not allowed to access this page.</h3>";
         } else {
             global $userRole;
@@ -215,12 +217,12 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             <tbody>';
                                     foreach ($booking_ids as $booking_id) {
                                         /*foreach($booking_id as $booking_id2) {*/
-                                        $booking 			= new WC_Booking($booking_id);
+                                            $booking 			= new WC_Booking($booking_id);
                                             $bookingProductID 	= $booking->get_product()->get_id(); //WCPV
                                             $bookingProductName = get_the_title($bookingProductID);
 
                                             /*Get order Status*/
-                                            $bookingOrder       = wc_get_order( $booking->order_id );
+                                            $bookingOrder       = new WC_Order( $booking->order_id);
                                             $bookingOrderData   = $bookingOrder->get_data(); // The Order data
                                             $bookingOrderStatus = $bookingOrderData['status'];
 
