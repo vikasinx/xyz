@@ -55,7 +55,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     register_activation_hook(__FILE__, 'jal_install');
     
-
     function get_selected_user_role()
     {
         global $wpdb;
